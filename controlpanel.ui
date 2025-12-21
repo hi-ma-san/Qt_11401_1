@@ -13,6 +13,42 @@
   <property name="windowTitle">
    <string>ControlPanel</string>
   </property>
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <item>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
+     </property>
+     <widget class="QWidget" name="tab_skin">
+      <attribute name="title">
+       <string>面板</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QListWidget" name="toolList_widget"/>
+         </item>
+         <item>
+          <widget class="QWidget" name="settingsContainer_widget" native="true"/>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_Layout">
+      <attribute name="title">
+       <string>主題</string>
+      </attribute>
+     </widget>
+     <widget class="QWidget" name="tab_setting">
+      <attribute name="title">
+       <string>設定</string>
+      </attribute>
+     </widget>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

@@ -10,15 +10,21 @@ CONFIG += c++17
 
 SOURCES += \
     main.cpp \
-    controlpanel.cpp
+    controlpanel.cpp \
+    toolsettingsform.cpp
 
 HEADERS += \
-    controlpanel.h
+    controlpanel.h \
+    toolsettingsform.h
 
 FORMS += \
-    controlpanel.ui
+    controlpanel.ui \
+    toolsettingsform.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+RESOURCES += \
+    resources.qrc
