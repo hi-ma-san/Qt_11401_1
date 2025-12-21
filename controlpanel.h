@@ -1,10 +1,10 @@
-#ifndef CONTROLSPANEL_H
-#define CONTROLSPANEL_H
+#ifndef CONTROLPANEL_H
+#define CONTROLPANEL_H
 
 #include <QWidget>
 #include <QList>
 #include <QVariantMap>
-#include "ToolSettingsForm.h" // 引入單一設定表單
+#include "toolsettingsform.h"
 
 namespace Ui { class ControlPanel; }
 
@@ -17,15 +17,26 @@ public:
     ~ControlPanel();
 
 private slots:
-    void on_toolList_currentRowChanged(int currentRow); // 處理列表選擇變化的槽
+    // 處理左側小工具列表選擇變化
+    void on_toolList_currentRowChanged(int currentRow);
+
+    // 處理主題分頁的儲存按鈕
+    void on_saveTheme_clicked();
+
+    // 處理設定分頁的套用按鈕
+    void on_applySetting_clicked();
 
 private:
     Ui::ControlPanel *ui;
-    QList<QVariantMap> m_toolsData; // 儲存 JSON 數據
 
-    ToolSettingsForm *m_settingsForm; // 單一通用設定表單的實例
+    // 儲存從 JSON 讀取的所有工具配置數據
+    QList<QVariantMap> m_toolsData;
 
-    bool loadToolsConfiguration(); // 載入 JSON 配置
+    // 右側嵌入式的通用設定表單
+    ToolSettingsForm *m_settingsForm;
+
+    // tools_config.json
+    bool loadToolsConfiguration();
 };
 
-#endif // CONTROLSPANEL_H
+#endif // CONTROLPANEL_H

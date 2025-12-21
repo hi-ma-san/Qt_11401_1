@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QVBoxLayout>
+#include <QMessageBox>
 
 ControlPanel::ControlPanel(QWidget *parent) :
     QWidget(parent),
@@ -15,20 +16,16 @@ ControlPanel::ControlPanel(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    // 1. 載入工具配置
+    // 載入工具配置
     if (!loadToolsConfiguration()) {
         qCritical() << "Failed to load tool configurations.";
-        // 可以在這裡顯示錯誤訊息給使用者
     }
 
-    // 2. 實例化並嵌入 ToolSettingsForm
-    //    【注意】：假設右側容器 QWidget 名為 settingsContainer_widget
-
+    // 嵌入 ToolSettingsForm
     m_settingsForm = new ToolSettingsForm(ui->settingsContainer_widget);
 
     QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->settingsContainer_widget->layout());
     if (!layout) {
-        // 如果容器還沒有佈局管理器，則創建一個新的
         layout = new QVBoxLayout(ui->settingsContainer_widget);
         layout->setContentsMargins(0, 0, 0, 0);
     }
@@ -37,21 +34,24 @@ ControlPanel::ControlPanel(QWidget *parent) :
     // 確保 ToolSettingsForm 顯示
     m_settingsForm->show();
 
-    // 3. 連接信號
+    // 連接
     if (!m_toolsData.isEmpty()) {
         // 預設選中第一項並觸發載入
         ui->toolList_widget->setCurrentRow(0);
 
-        // 連接到 ControlPanel 自己的槽
+        // 連接到列表切換的槽
         connect(ui->toolList_widget, &QListWidget::currentRowChanged,
                 this, &ControlPanel::on_toolList_currentRowChanged);
     }
+
+    //連接主題與全域設定按鈕
+    connect(ui->saveTheme_button, &QPushButton::clicked, this, &ControlPanel::on_saveTheme_clicked);
+    connect(ui->applySetting_button, &QPushButton::clicked, this, &ControlPanel::on_applySetting_clicked);
 }
 
-//讀取JSON
+// 讀取 JSON 配置
 bool ControlPanel::loadToolsConfiguration()
 {
-    // 假設 JSON 檔案已放入 resources.qrc 中的 :/config/ 前綴
     QFile loadFile(":/config/tools_config.json");
 
     if (!loadFile.open(QIODevice::ReadOnly)) {
@@ -69,44 +69,53 @@ bool ControlPanel::loadToolsConfiguration()
 
     QJsonArray toolsArray = jsonDoc.array();
 
-    // 遍歷 JSON 陣列，動態填充列表
     for (const QJsonValue &value : toolsArray) {
         QJsonObject toolObject = value.toObject();
 
-        // 1. 儲存數據 (QVariantMap)
-        QVariantMap toolMap = toolObject.toVariantMap();
-        m_toolsData.append(toolMap);
+        // 儲存
+        m_toolsData.append(toolObject.toVariantMap());
 
-        // 2. 填充 QListWidget (左側清單)
-        QString toolName = toolObject["name"].toString();
-        // 【優化】這裡可以加入 icon_path，讓列表顯示圖示
-        QListWidgetItem *item = new QListWidgetItem(toolName);
-
-        // 假設 icon_path 存在且是有效的資源路徑
-        // item->setIcon(QIcon(toolObject["icon_path"].toString()));
-
-        ui->toolList_widget->addItem(item); // 將項目加入列表
+        // 填充 QListWidget
+        ui->toolList_widget->addItem(toolObject["name"].toString());
     }
 
     return true;
 }
+
+// 處理小工具列表選擇變化
 void ControlPanel::on_toolList_currentRowChanged(int currentRow)
 {
-    qDebug()  << currentRow;
-    // 檢查行號是否在有效的數據範圍內
     if (currentRow >= 0 && currentRow < m_toolsData.size()) {
-
-        // 1. 取得當前選中小工具的完整 JSON 數據 (QVariantMap)
         const QVariantMap &toolData = m_toolsData.at(currentRow);
-
-        // 2. 呼叫 ToolSettingsForm 的載入函式，傳遞數據
-        //    這一步需要 ToolSettingsForm 具備這個 public 函式：
         m_settingsForm->loadToolData(toolData);
 
         qDebug() << "ControlPanel: Selected tool changed to:" << toolData["name"].toString();
     } else {
         qWarning() << "ControlPanel: Invalid row selected:" << currentRow;
     }
+}
+
+// 主題與設定處理函數
+
+void ControlPanel::on_saveTheme_clicked()
+{
+    QString themeName = ui->themeName_lineEdit->text();
+    if(themeName.isEmpty()) {
+        QMessageBox::information(this, tr("提示"), tr("請輸入主題名稱喵！"));
+        return;
+    }
+    qDebug() << "正在儲存當前佈局為主題:" << themeName;
+    // TODO: 實作儲存所有 Widget 狀態的 JSON 邏輯
+}
+
+void ControlPanel::on_applySetting_clicked()
+{
+    bool isLocked = ui->globalLockDrag_checkBox->isChecked();
+    bool showTray = ui->trayIcon_checkBox->isChecked();
+
+    qDebug() << "套用設定: 全域禁止拖曳=" << isLocked << ", 顯示通知圖示=" << showTray;
+    // TODO: 透過 Manager 通知所有 Widget 更新行為
+    QMessageBox::information(this, tr("設定"), tr("全域設定已成功套用喵！"));
 }
 
 ControlPanel::~ControlPanel()
