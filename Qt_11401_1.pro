@@ -9,17 +9,21 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    main.cpp \
-    controlpanel.cpp \
-    toolsettingsform.cpp
+    BaseComponent.cpp \
+    ControlPanel.cpp \
+    SettingsManager.cpp \
+    ToolSettingsForm.cpp \
+    main.cpp
 
 HEADERS += \
-    controlpanel.h \
-    toolsettingsform.h
+    BaseComponent.h \
+    ControlPanel.h \
+    SettingsManager.h \
+    ToolSettingsForm.h
 
 FORMS += \
-    controlpanel.ui \
-    toolsettingsform.ui
+    ControlPanel.ui \
+    ToolSettingsForm.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

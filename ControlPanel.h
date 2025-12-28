@@ -4,7 +4,7 @@
 #include <QWidget>
 #include <QList>
 #include <QVariantMap>
-#include "toolsettingsform.h"
+#include "ToolSettingsForm.h"
 
 namespace Ui { class ControlPanel; }
 

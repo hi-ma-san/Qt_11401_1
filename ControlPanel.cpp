@@ -1,6 +1,6 @@
-#include "controlpanel.h"
-#include "ui_controlpanel.h"
-
+#include "ControlPanel.h"
+#include "ui_ControlPanel.h"
+#include "SettingsManager.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -113,9 +113,8 @@ void ControlPanel::on_applySetting_clicked()
     bool isLocked = ui->globalLockDrag_checkBox->isChecked();
     bool showTray = ui->trayIcon_checkBox->isChecked();
 
-    qDebug() << "套用設定: 全域禁止拖曳=" << isLocked << ", 顯示通知圖示=" << showTray;
-    // TODO: 透過 Manager 通知所有 Widget 更新行為
-    QMessageBox::information(this, tr("設定"), tr("全域設定已成功套用喵！"));
+    SettingsManager::instance()->setGlobalDragLocked(isLocked);
+    SettingsManager::instance()->setShowTrayIcon(showTray);
 }
 
 ControlPanel::~ControlPanel()
