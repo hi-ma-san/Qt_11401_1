@@ -11,6 +11,18 @@ BaseComponent::BaseComponent(QWidget *parent) : QWidget(parent) {
     this->setAttribute(Qt::WA_TranslucentBackground);
 }
 
+void BaseComponent::initStyle() {
+    // 在父類別定義通用的 QSS 樣式
+    // 使用 .BaseComponent 語法可以確保子類別繼承這些外觀
+    this->setStyleSheet(
+        "BaseComponent {"
+        "  background-color: rgba(30, 30, 30, 180);" /* 半透明深灰色背景 */
+        "  border-radius: 20px;"                     /* 統一圓角 */
+        "  border: 1px solid rgba(255, 255, 255, 40);" /* 細微的白色邊框線 */
+        "}"
+        );
+}
+
 void BaseComponent::setWindowLayer(int layer) {
     Qt::WindowFlags flags = this->windowFlags();
     if (layer == 1) { // 永遠置頂

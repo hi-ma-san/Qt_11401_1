@@ -13,7 +13,7 @@ public:
     virtual ~BaseComponent() = default;
 
     // 虛擬函式：由子類別實作具體內容
-    virtual void initStyle() = 0;
+    virtual void initStyle();
     virtual void updateData() = 0; // 用於每秒更新
 
     // 設定與行為控制
