@@ -19,6 +19,8 @@ public:
     // --- 虛擬函式：由子類別實作具體內容 ---
     virtual void initStyle();
     virtual void updateData() = 0; // 用於每秒更新 (如時間、系統資訊)
+    virtual void setUpdateInterval(int ms) { m_updateInterval = ms; } // 新增：設定更新頻率
+    virtual int updateInterval() const { return m_updateInterval; }   // 新增：取得更新頻率
 
     // --- 行為設定 (Setters) ---
     void setDraggable(bool enable) { m_isDraggable = enable; }
@@ -35,6 +37,12 @@ public:
     bool isSnapEnabled() const { return m_isSnapEnabled; }
     bool isHoverHideEnabled() const { return m_hoverHide; }
     double hoverOpacity() const { return m_hoverOpacity; }
+
+    // --- 擴充設定介面 ---
+    virtual void setCustomSetting(const QString &key, const QVariant &value) {
+        Q_UNUSED(key);
+        Q_UNUSED(value);
+    }
 
     /**
      * @brief 取得目前的視窗層級標籤
@@ -67,6 +75,7 @@ protected:
     // 懸停隱藏邏輯屬性
     bool m_hoverHide = false;
     double m_hoverOpacity = 1.0;
+    int m_updateInterval = 1000; // 預設 1000ms
 
     // 滑鼠進出事件：處理懸停透明度變化
     void enterEvent(QEnterEvent *event) override;

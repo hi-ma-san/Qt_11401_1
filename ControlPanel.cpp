@@ -1,6 +1,8 @@
 #include "ControlPanel.h"
 #include "ui_ControlPanel.h"
 #include "SettingsManager.h"
+#include "Widgets/TimeWidget.h"
+#include "Widgets/CpuWidget.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -8,6 +10,7 @@
 #include <QDebug>
 #include <QVBoxLayout>
 #include <QMessageBox>
+#include <QSpinBox>
 
 ControlPanel::ControlPanel(QWidget *parent) :
     QWidget(parent),
@@ -74,20 +77,70 @@ ControlPanel::ControlPanel(QWidget *parent) :
             w->setWindowFlags(flags);
             w->show(); // 必須重新 show 才能生效
         }
+        else if (key == "interval") { // 新增：處理更新頻率
+            w->setUpdateInterval(value.toInt());
+        }
         else if (key == "path") {
             qDebug() << "路徑變更通知：" << id << " -> " << value.toString();
         }
         else if (key == "save_request") {
             this->on_saveTheme_clicked();
         }
+        else {
+            // 轉發其他自訂設定給元件
+            w->setCustomSetting(key, value);
+        }
     });
 
     // 5. 清單切換連動
     if (!m_toolsData.isEmpty()) {
-        ui->toolList_widget->setCurrentRow(0);
         connect(ui->toolList_widget, &QListWidget::currentRowChanged,
                 this, &ControlPanel::on_toolList_currentRowChanged);
+        
+        // 手動觸發第一次選擇，確保介面初始化正確
+        ui->toolList_widget->setCurrentRow(0);
+        on_toolList_currentRowChanged(0);
     }
+
+    // 6. 全域更新頻率連動
+    // 定義預設選項對應的數值 (與 ComboBox 順序一致)
+    // 慢速(2000), 普通(1000), 快速(500), 極速(250), 即時(100), 自訂(-1)
+    const QList<int> intervalPresets = {2000, 1000, 500, 250, 100, -1};
+
+    // 設定預設值 (普通 1000ms)
+    ui->globalInterval_comboBox->setCurrentIndex(1); 
+
+    auto updateIntervalFunc = [this, intervalPresets](int index) {
+        int ms = 1000;
+        if (index >= 0 && index < intervalPresets.size()) {
+            ms = intervalPresets[index];
+        }
+        
+        // 如果是自訂模式
+        if (ms == -1) {
+            ui->globalInterval_spinBox->setEnabled(true);
+            ms = ui->globalInterval_spinBox->value();
+        } else {
+            ui->globalInterval_spinBox->setEnabled(false);
+            ui->globalInterval_spinBox->setValue(ms); // 同步顯示數值
+        }
+
+        // 更新所有元件
+        for(auto w : m_widgetInstances) {
+            if(w) w->setUpdateInterval(ms);
+        }
+    };
+
+    // 連接 ComboBox 變更
+    connect(ui->globalInterval_comboBox, QOverload<int>::of(&QComboBox::currentIndexChanged), 
+            this, updateIntervalFunc);
+
+    // 連接 SpinBox 變更 (僅在自訂模式下有效)
+    connect(ui->globalInterval_spinBox, &QSpinBox::valueChanged, this, [this, updateIntervalFunc](int){
+        if (ui->globalInterval_comboBox->currentIndex() == 5) { // 5 is Custom
+            updateIntervalFunc(5);
+        }
+    });
 
     connect(ui->saveTheme_button, &QPushButton::clicked, this, &ControlPanel::on_saveTheme_clicked);
     connect(ui->applySetting_button, &QPushButton::clicked, this, &ControlPanel::on_applySetting_clicked);
@@ -103,6 +156,8 @@ void ControlPanel::initWidgets()
         BaseComponent* instance = nullptr;
         if (widgetClass == "TimeWidget") {
             instance = new TimeWidget();
+        } else if (widgetClass == "CpuWidget") {
+            instance = new CpuWidget();
         }
 
         if (instance) {

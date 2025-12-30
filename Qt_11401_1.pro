@@ -14,6 +14,7 @@ SOURCES += \
     Core/SettingsManager.cpp \
     ToolSettingsForm.cpp \
     Widgets/TimeWidget.cpp \
+    Widgets/CpuWidget.cpp \
     main.cpp
 
 HEADERS += \
@@ -21,7 +22,8 @@ HEADERS += \
     ControlPanel.h \
     Core/SettingsManager.h \
     ToolSettingsForm.h \
-    Widgets/TimeWidget.h
+    Widgets/TimeWidget.h \
+    Widgets/CpuWidget.h
 
 FORMS += \
     ControlPanel.ui \
@@ -36,3 +38,5 @@ RESOURCES += \
     resources.qrc
 
 INCLUDEPATH += Core Widgets
+
+win32: LIBS += -lpdh -lPowrProf

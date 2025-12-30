@@ -31,6 +31,13 @@ TimeWidget::TimeWidget(QWidget *parent) : BaseComponent(parent) {
     updateData();
 }
 
+void TimeWidget::setUpdateInterval(int ms) {
+    BaseComponent::setUpdateInterval(ms);
+    if (m_updateTimer) {
+        m_updateTimer->setInterval(ms);
+    }
+}
+
 void TimeWidget::initStyle() {
     BaseComponent::initStyle(); // 繼承半透明圓角背景
 

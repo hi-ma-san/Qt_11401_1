@@ -6,6 +6,7 @@
 #include <QFileInfo>
 #include <QDebug>
 #include <QCoreApplication>
+#include <QSpinBox>
 
 ToolSettingsForm::ToolSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -49,7 +50,61 @@ void ToolSettingsForm::loadToolData(const QVariantMap &toolData) {
 
     // 根據 ID 決定要不要顯示路徑設定群組
     updateSpecificFields(toolId);
+
+    // 建立進階設定
+    createAdvancedSettings(toolId);
 }
+
+void ToolSettingsForm::createAdvancedSettings(const QString &toolId) {
+    // 清除舊的動態元件 (如果有)
+    // 這裡簡單實作：如果已經有 advanced_groupBox 就先移除
+    QGroupBox *oldGroup = findChild<QGroupBox*>("advanced_groupBox");
+    if (oldGroup) {
+        delete oldGroup;
+    }
+
+    if (toolId == "system_monitor") {
+        QGroupBox *advGroup = new QGroupBox("進階顯示設定", this);
+        advGroup->setObjectName("advanced_groupBox");
+        QVBoxLayout *layout = new QVBoxLayout(advGroup);
+
+        QCheckBox *chkCores = new QCheckBox("顯示 CPU 核心詳細資訊", advGroup);
+        QCheckBox *chkCoreFreq = new QCheckBox("顯示 CPU 頻率", advGroup); // 改名
+        QCheckBox *chkRam = new QCheckBox("顯示記憶體詳細 (GB)", advGroup);
+        
+        // 新增：頻率演算法選擇
+        QLabel *lblFreq = new QLabel("頻率顯示演算法:", advGroup);
+        QComboBox *comboFreq = new QComboBox(advGroup);
+        comboFreq->addItem("最大頻率 (Max)", 0);
+        comboFreq->addItem("平均頻率 (Average)", 1);
+        comboFreq->setObjectName("freqAlgo_comboBox");
+
+        layout->addWidget(chkCores);
+        layout->addWidget(chkCoreFreq); // 新增
+        layout->addWidget(chkRam);
+        layout->addWidget(lblFreq);
+        layout->addWidget(comboFreq);
+
+        // 連接訊號
+        connect(chkCores, &QCheckBox::clicked, this, [this, chkCores](){
+            emit settingChanged("showCores", chkCores->isChecked());
+        });
+        connect(chkCoreFreq, &QCheckBox::clicked, this, [this, chkCoreFreq](){ // 新增
+            emit settingChanged("showCoreFreq", chkCoreFreq->isChecked());
+        });
+        connect(chkRam, &QCheckBox::clicked, this, [this, chkRam](){
+            emit settingChanged("showRamDetail", chkRam->isChecked());
+        });
+        connect(comboFreq, QOverload<int>::of(&QComboBox::currentIndexChanged), this, [this, comboFreq](int index){
+            emit settingChanged("freqAlgo", comboFreq->currentData());
+        });
+
+        // 將新群組加入主佈局 (插入在最後面)
+        ui->verticalLayout->insertWidget(ui->verticalLayout->count()-1, advGroup);
+    }
+}
+
+#include "Widgets/CpuWidget.h" // 需要引入以使用 dynamic_cast
 
 void ToolSettingsForm::updateAllUI(BaseComponent* w) {
     if (!w) return;
@@ -69,6 +124,17 @@ void ToolSettingsForm::updateAllUI(BaseComponent* w) {
 
     ui->position_comboBox->setCurrentIndex(w->windowLayer());
     ui->clickThrough_checkBox->setChecked(w->isClickThrough());
+
+    // 更新進階設定 (如果是 CpuWidget)
+    CpuWidget* cpuWidget = dynamic_cast<CpuWidget*>(w);
+    if (cpuWidget) {
+        QComboBox* comboFreq = findChild<QComboBox*>("freqAlgo_comboBox");
+        if (comboFreq) {
+            // 暫時解除 blockSignals 以便更新子元件 (雖然這裡是動態生成的，可能不在 this->blockSignals 範圍內，但保險起見)
+            // 其實 findChild 找到的元件是 this 的子物件，所以也會被 blockSignals(true) 影響
+            comboFreq->setCurrentIndex(static_cast<int>(cpuWidget->frequencyMode()));
+        }
+    }
 
     this->blockSignals(false);
 }
