@@ -24,6 +24,10 @@ ControlPanel::ControlPanel(QWidget *parent) :
         qCritical() << "Failed to load tool configurations.";
     }
 
+    // 初始化全域設定 UI 狀態
+    ui->globalLockDrag_checkBox->setChecked(SettingsManager::instance()->isGlobalDragLocked());
+    ui->trayIcon_checkBox->setChecked(SettingsManager::instance()->showTrayIcon());
+
     // 2. 實例化工具
     initWidgets();
 
