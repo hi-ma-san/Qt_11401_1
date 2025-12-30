@@ -14,6 +14,7 @@ public:
 
     void initStyle() override;
     void updateData() override;
+    void setUpdateInterval(int ms) override; // 新增
 
 private:
     QLabel *m_timeLabel;

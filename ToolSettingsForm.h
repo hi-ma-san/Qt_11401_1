@@ -58,6 +58,9 @@ private:
 
     // 初始化內部 UI 元件與 emitSetting 的連接
     void setupInternalConnections();
+
+    // 動態建立進階設定選項
+    void createAdvancedSettings(const QString &toolId);
 };
 
 #endif // TOOLSETTINGSFORM_H
