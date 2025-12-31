@@ -201,6 +201,14 @@ void DiskWidget::updateData() {
                 vLayout->addWidget(ui.detailLabel);
                 vLayout->addWidget(ui.speedLabel);
 
+                // Make clickable
+                ui.container->setCursor(Qt::PointingHandCursor);
+                ui.container->installEventFilter(this);
+                ui.nameLabel->installEventFilter(this);
+                ui.usageBar->installEventFilter(this);
+                ui.detailLabel->installEventFilter(this);
+                ui.speedLabel->installEventFilter(this);
+
                 m_diskLayout->addWidget(ui.container);
                 m_diskUIs.insert(path, ui);
 
@@ -322,3 +330,21 @@ void DiskWidget::removeDiskCounter(const QString &driveLetter) {
     }
 }
 #endif
+
+bool DiskWidget::eventFilter(QObject *watched, QEvent *event) {
+    if (event->type() == QEvent::MouseButtonRelease) {
+        // Check if the watched object belongs to any disk UI
+        for (auto it = m_diskUIs.begin(); it != m_diskUIs.end(); ++it) {
+            const DiskUI &ui = it.value();
+            if (watched == ui.container || watched == ui.nameLabel || 
+                watched == ui.usageBar || watched == ui.detailLabel || 
+                watched == ui.speedLabel) {
+                
+                QString path = it.key();
+                QDesktopServices::openUrl(QUrl::fromLocalFile(path));
+                return true;
+            }
+        }
+    }
+    return BaseComponent::eventFilter(watched, event);
+}
