@@ -8,6 +8,8 @@
 #include <QStorageInfo>
 #include <QMap>
 #include <QProgressBar>
+#include <QDesktopServices>
+#include <QUrl>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -28,6 +30,9 @@ public:
     bool isShowUsagePercent() const { return m_showUsagePercent; }
     bool isShowTransferSpeed() const { return m_showTransferSpeed; }
     bool isShowActiveTime() const { return m_showActiveTime; }
+
+protected:
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 private:
     QLabel *m_titleLabel;
