@@ -16,6 +16,7 @@ SOURCES += \
     Widgets/TimeWidget.cpp \
     Widgets/CpuWidget.cpp \
     Widgets/DiskWidget.cpp \
+    Widgets/NetworkWidget.cpp \
     main.cpp
 
 HEADERS += \
@@ -25,7 +26,8 @@ HEADERS += \
     ToolSettingsForm.h \
     Widgets/TimeWidget.h \
     Widgets/CpuWidget.h \
-    Widgets/DiskWidget.h
+    Widgets/DiskWidget.h \
+    Widgets/NetworkWidget.h
 
 FORMS += \
     ControlPanel.ui \
@@ -41,4 +43,4 @@ RESOURCES += \
 
 INCLUDEPATH += Core Widgets
 
-win32: LIBS += -lpdh -lPowrProf
+win32: LIBS += -lpdh -lPowrProf -liphlpapi

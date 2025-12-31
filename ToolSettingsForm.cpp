@@ -1,5 +1,6 @@
 #include "ToolSettingsForm.h"
 #include "ui_ToolSettingsForm.h"
+#include "Widgets/NetworkWidget.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QFile>
@@ -7,6 +8,7 @@
 #include <QDebug>
 #include <QCoreApplication>
 #include <QSpinBox>
+#include <QListWidget>
 
 ToolSettingsForm::ToolSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -130,6 +132,42 @@ void ToolSettingsForm::createAdvancedSettings(const QString &toolId) {
 
         ui->verticalLayout->insertWidget(ui->verticalLayout->count()-1, advGroup);
     }
+    else if (toolId == "network") {
+        QGroupBox *advGroup = new QGroupBox("進階顯示設定", this);
+        advGroup->setObjectName("advanced_groupBox");
+        QVBoxLayout *layout = new QVBoxLayout(advGroup);
+
+        QCheckBox *chkBits = new QCheckBox("顯示為 Bits (bps)", advGroup);
+        chkBits->setObjectName("network_bits_checkBox");
+        
+        QLabel *lblInterface = new QLabel("選擇網路介面 (可多選):", advGroup);
+        QListWidget *listInterfaces = new QListWidget(advGroup);
+        listInterfaces->setObjectName("network_interface_list");
+        listInterfaces->setSelectionMode(QAbstractItemView::NoSelection); // Handle selection via checkboxes
+        listInterfaces->setFixedHeight(150);
+
+        layout->addWidget(chkBits);
+        layout->addWidget(lblInterface);
+        layout->addWidget(listInterfaces);
+
+        connect(chkBits, &QCheckBox::clicked, this, [this, chkBits](){
+            emit settingChanged("showInBits", chkBits->isChecked());
+        });
+        
+        // Handle item changes in the list widget
+        connect(listInterfaces, &QListWidget::itemChanged, this, [this, listInterfaces](QListWidgetItem *item){
+            QStringList selected;
+            for(int i=0; i<listInterfaces->count(); ++i) {
+                QListWidgetItem* it = listInterfaces->item(i);
+                if (it->checkState() == Qt::Checked) {
+                    selected.append(it->text());
+                }
+            }
+            emit settingChanged("selectedInterfaces", selected);
+        });
+
+        ui->verticalLayout->insertWidget(ui->verticalLayout->count()-1, advGroup);
+    }
 }
 
 #include "Widgets/CpuWidget.h" // 需要引入以使用 dynamic_cast
@@ -174,7 +212,37 @@ void ToolSettingsForm::updateAllUI(BaseComponent* w) {
         if (chkSpeed) chkSpeed->setChecked(diskWidget->isShowTransferSpeed());
         if (chkActive) chkActive->setChecked(diskWidget->isShowActiveTime());
     }
+    NetworkWidget* netWidget = dynamic_cast<NetworkWidget*>(w);
+    if (netWidget) {
+        QCheckBox* chkBits = findChild<QCheckBox*>("network_bits_checkBox");
+        if (chkBits) {
+            chkBits->blockSignals(true);
+            chkBits->setChecked(netWidget->isShowInBits());
+            chkBits->blockSignals(false);
+        }
 
+        QListWidget* listInterfaces = findChild<QListWidget*>("network_interface_list");
+        if (listInterfaces) {
+            listInterfaces->blockSignals(true);
+            listInterfaces->clear();
+            
+            QStringList available = netWidget->getAvailableInterfaces();
+            QStringList selected = netWidget->getSelectedInterfaces();
+            
+            // Always add "Total" option
+            QListWidgetItem* totalItem = new QListWidgetItem("Total", listInterfaces);
+            totalItem->setFlags(totalItem->flags() | Qt::ItemIsUserCheckable);
+            totalItem->setCheckState(selected.contains("Total") || selected.isEmpty() ? Qt::Checked : Qt::Unchecked);
+
+            for (const QString &iface : available) {
+                QListWidgetItem* item = new QListWidgetItem(iface, listInterfaces);
+                item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+                item->setCheckState(selected.contains(iface) ? Qt::Checked : Qt::Unchecked);
+            }
+            
+            listInterfaces->blockSignals(false);
+        }
+    }
     this->blockSignals(false);
 }
 

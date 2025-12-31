@@ -4,6 +4,7 @@
 #include "Widgets/TimeWidget.h"
 #include "Widgets/CpuWidget.h"
 #include "Widgets/DiskWidget.h"
+#include "Widgets/NetworkWidget.h"
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -165,6 +166,8 @@ void ControlPanel::initWidgets()
             instance = new CpuWidget();
         } else if (widgetClass == "DiskWidget") {
             instance = new DiskWidget();
+        } else if (widgetClass == "NetworkWidget") {
+            instance = new NetworkWidget();
         }
 
         if (instance) {
