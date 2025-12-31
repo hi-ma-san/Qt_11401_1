@@ -17,6 +17,7 @@ SOURCES += \
     Widgets/CpuWidget.cpp \
     Widgets/DiskWidget.cpp \
     Widgets/NetworkWidget.cpp \
+    Widgets/ToDoWidget.cpp \
     main.cpp
 
 HEADERS += \
@@ -27,7 +28,8 @@ HEADERS += \
     Widgets/TimeWidget.h \
     Widgets/CpuWidget.h \
     Widgets/DiskWidget.h \
-    Widgets/NetworkWidget.h
+    Widgets/NetworkWidget.h \
+    Widgets/ToDoWidget.h
 
 FORMS += \
     ControlPanel.ui \
