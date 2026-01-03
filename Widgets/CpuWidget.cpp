@@ -98,6 +98,9 @@ void CpuWidget::initStyle() {
     m_cpuLabel->setObjectName("cpuLabel");
     m_ramLabel->setObjectName("ramLabel");
     m_ramDetailLabel->setObjectName("ramDetailLabel");
+
+    this->style()->unpolish(this);
+    this->style()->polish(this);
 }
 
 void CpuWidget::setUpdateInterval(int ms) {

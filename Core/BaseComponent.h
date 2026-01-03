@@ -6,6 +6,7 @@
 #include <QMouseEvent>
 #include <QTimer>
 #include <QCursor>
+#include <QStyle>
 
 /**
  * @brief 所有桌面小工具的基底類別
