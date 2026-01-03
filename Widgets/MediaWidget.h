@@ -1,7 +1,7 @@
 #ifndef MEDIAWIDGET_H
 #define MEDIAWIDGET_H
 
-#include "BaseComponent.h"
+#include "Core/BaseComponent.h"
 #include <QLabel>
 #include <QPushButton>
 #include <QMediaPlayer>

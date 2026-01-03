@@ -54,6 +54,10 @@ MediaWidget::MediaWidget(QWidget *parent)
     connect(m_previousBtn, &QPushButton::clicked, this, &MediaWidget::onPreviousClicked);
     connect(m_nextBtn, &QPushButton::clicked, this, &MediaWidget::onNextClicked);
     connect(m_mediaPlayer, &QMediaPlayer::mediaStatusChanged, this, &MediaWidget::onMediaStatusChanged);
+    connect(m_mediaPlayer, &QMediaPlayer::playbackStateChanged, this, [this](QMediaPlayer::PlaybackState state) {
+        m_isPlaying = (state == QMediaPlayer::PlayingState);
+        updatePlayPauseButton();
+    });
 
     initStyle();
     this->setFixedSize(220, 140);
@@ -98,6 +102,10 @@ void MediaWidget::initStyle()
 
     m_titleLabel->setObjectName("titleLabel");
     m_currentSongLabel->setObjectName("songLabel");
+
+    // 更新樣式
+    this->style()->unpolish(this);
+    this->style()->polish(this);
 }
 
 void MediaWidget::updateData()
@@ -155,8 +163,6 @@ void MediaWidget::playCurrentSong()
     QString filePath = m_playlist[m_currentIndex];
     m_mediaPlayer->setSource(QUrl::fromLocalFile(filePath));
     m_mediaPlayer->play();
-    m_isPlaying = true;
-    updatePlayPauseButton();
     updateSongLabel();
 
     qDebug() << "MediaWidget: 播放" << filePath;
@@ -190,7 +196,6 @@ void MediaWidget::onPlayPauseClicked()
 
     if (m_isPlaying) {
         m_mediaPlayer->pause();
-        m_isPlaying = false;
     } else {
         if (m_mediaPlayer->playbackState() == QMediaPlayer::StoppedState) {
             // 如果完全停止了，重新播放當前歌曲
@@ -198,10 +203,8 @@ void MediaWidget::onPlayPauseClicked()
         } else {
             // 如果只是暫停，繼續播放
             m_mediaPlayer->play();
-            m_isPlaying = true;
         }
     }
-    updatePlayPauseButton();
 }
 
 void MediaWidget::onPreviousClicked()
