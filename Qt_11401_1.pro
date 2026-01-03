@@ -13,6 +13,7 @@ SOURCES += \
     ControlPanel.cpp \
     Core/SettingsManager.cpp \
     ToolSettingsForm.cpp \
+    Widgets/ImageWidget.cpp \
     Widgets/TimeWidget.cpp \
     Widgets/CpuWidget.cpp \
     Widgets/DiskWidget.cpp \
@@ -26,6 +27,7 @@ HEADERS += \
     Core/SettingsManager.h \
     ThemeManager.h \
     ToolSettingsForm.h \
+    Widgets/ImageWidget.h \
     Widgets/TimeWidget.h \
     Widgets/CpuWidget.h \
     Widgets/DiskWidget.h \
