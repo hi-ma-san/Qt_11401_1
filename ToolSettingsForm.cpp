@@ -1,6 +1,7 @@
 #include "ToolSettingsForm.h"
 #include "ui_ToolSettingsForm.h"
 #include "Widgets/NetworkWidget.h"
+#include "ImageWidget.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QFile>
@@ -9,6 +10,7 @@
 #include <QCoreApplication>
 #include <QSpinBox>
 #include <QListWidget>
+
 
 ToolSettingsForm::ToolSettingsForm(QWidget *parent) :
     QWidget(parent),
@@ -168,6 +170,28 @@ void ToolSettingsForm::createAdvancedSettings(const QString &toolId) {
 
         ui->verticalLayout->insertWidget(ui->verticalLayout->count()-1, advGroup);
     }
+    else if (toolId == "image_viewer") {
+        QGroupBox *advGroup = new QGroupBox("圖片縮放比例", this);
+        advGroup->setObjectName("advanced_groupBox");
+        QVBoxLayout *layout = new QVBoxLayout(advGroup);
+
+        // 使用一個25% ~ 100%的拉bar
+        QLabel *lblScale = new QLabel("縮放百分比 (25% - 100%):", advGroup);
+        QSlider *scaleSlider = new QSlider(Qt::Horizontal, advGroup);
+        scaleSlider->setRange(25, 100);
+        scaleSlider->setValue(100); // 預設 100%
+        scaleSlider->setObjectName("image_scale_slider");
+
+        layout->addWidget(lblScale);
+        layout->addWidget(scaleSlider);
+
+        // 滑動拉桿時
+        connect(scaleSlider, &QSlider::valueChanged, this, [this, scaleSlider](int value){
+            emit settingChanged("scale", value);
+        });
+
+        ui->verticalLayout->insertWidget(ui->verticalLayout->count()-1, advGroup);
+    }
 }
 
 #include "Widgets/CpuWidget.h" // 需要引入以使用 dynamic_cast
@@ -243,6 +267,19 @@ void ToolSettingsForm::updateAllUI(BaseComponent* w) {
             listInterfaces->blockSignals(false);
         }
     }
+    ImageWidget* imgWidget = dynamic_cast<ImageWidget*>(w);
+    if (imgWidget) {
+        QSlider* scaleSlider = findChild<QSlider*>("image_scale_slider");
+        if (scaleSlider) {
+            scaleSlider->blockSignals(true); // 避免觸發訊號導致重複更新
+            scaleSlider->setValue(imgWidget->currentScale());
+            scaleSlider->blockSignals(false);
+        }
+
+        // 同步路徑
+        // ui->musicPath_lineEdit->setText(imgWidget->currentPath());
+    }
+
     this->blockSignals(false);
 }
 
@@ -303,7 +340,11 @@ void ToolSettingsForm::on_browsePath_button_clicked() {
     if (toolId == "image_viewer") {
         QString filePath = QFileDialog::getOpenFileName(this, "選擇圖片/GIF", "", "Images (*.png *.jpg *.jpeg *.gif)");
         if (!filePath.isEmpty()) {
+            // 釋放目前資源 否則gif會持續占用
+            emit settingChanged("clear_media", true);
+            if (QFile::exists(finalPath)) { QFile::remove(finalPath); }
             // 實作的備份邏輯
+
             QString saveDir = QCoreApplication::applicationDirPath() + "/user_assets/images/";
             QDir().mkpath(saveDir);
             QFileInfo info(filePath);

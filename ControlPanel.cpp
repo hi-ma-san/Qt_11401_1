@@ -1,11 +1,15 @@
 #include "ControlPanel.h"
 #include "ui_ControlPanel.h"
 #include "SettingsManager.h"
-#include "Widgets/TimeWidget.h"
-#include "Widgets/CpuWidget.h"
-#include "Widgets/DiskWidget.h"
-#include "Widgets/NetworkWidget.h"
-#include "Widgets/ToDoWidget.h"
+
+/* -----Widget----- */
+#include "TimeWidget.h"
+#include "CpuWidget.h"
+#include "DiskWidget.h"
+#include "NetworkWidget.h"
+#include "ToDoWidget.h"
+#include "ImageWidget.h"
+
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -40,7 +44,7 @@ ControlPanel::ControlPanel(QWidget *parent) :
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_settingsForm);
 
-    // 4. 【核心中樞】連接萬用設定訊號
+    // 連接萬用設定訊號
     connect(m_settingsForm, &ToolSettingsForm::settingChanged, this, [this](QString key, QVariant value){
         int currentRow = ui->toolList_widget->currentRow();
         if (currentRow < 0) return;
@@ -88,7 +92,9 @@ ControlPanel::ControlPanel(QWidget *parent) :
             w->setUpdateInterval(value.toInt());
         }
         else if (key == "path") {
+            // --- 核心修正：將路徑變更實質傳遞給 Widget ---
             qDebug() << "路徑變更通知：" << id << " -> " << value.toString();
+            w->setCustomSetting("path", value); // 呼叫 ImageWidget 的實作喵！
         }
         else if (key == "save_request") {
             this->on_saveTheme_clicked();
@@ -174,6 +180,9 @@ void ControlPanel::initWidgets()
             instance = new NetworkWidget();
         } else if (widgetClass == "ToDoWidget") {
             instance = new ToDoWidget();
+        }
+        else if (widgetClass == "ImageWidget") {
+            instance = new ImageWidget();
         }
 
         if (instance) {
