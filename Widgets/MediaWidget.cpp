@@ -183,7 +183,7 @@ void MediaWidget::updateSongLabel()
 void MediaWidget::updatePlayPauseButton()
 {
     if (m_isPlaying) {
-        m_playPauseBtn->setText("▮▮");
+        m_playPauseBtn->setText("||");
     } else {
         m_playPauseBtn->setText("▶");
     }
