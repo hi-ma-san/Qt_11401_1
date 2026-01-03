@@ -90,6 +90,9 @@ void ToDoWidget::initStyle() {
         "QCheckBox::indicator:hover { border-color: white; }"
         "QCheckBox::indicator:checked { background: #4CAF50; border: 1px solid #4CAF50; }"
     );
+
+    this->style()->unpolish(this);
+    this->style()->polish(this);
 }
 
 void ToDoWidget::updateData() {

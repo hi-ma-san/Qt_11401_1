@@ -57,6 +57,9 @@ void NetworkWidget::initStyle() {
                         );
     
     m_titleLabel->setObjectName("titleLabel");
+    this->style()->unpolish(this);
+    this->style()->polish(this);
+
 }
 
 void NetworkWidget::createInterfaceRow(const QString &name) {
