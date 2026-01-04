@@ -6,6 +6,7 @@
 #include <QVBoxLayout>
 #include <QTimer>
 #include <QMap>
+#include <QProcess>
 
 #ifdef Q_OS_WIN
 #include <pdh.h>
@@ -33,13 +34,25 @@ public:
 
     QStringList getAvailableInterfaces() const;
     bool isShowInBits() const { return m_showInBits; }
+    bool isShowPing() const { return m_showPing; }
     QStringList getSelectedInterfaces() const { return m_selectedInterfaces; }
+    QString getPingTarget() const { return m_pingTarget; }
 
 private:
     QLabel *m_titleLabel;
     QWidget *m_container;
     QVBoxLayout *m_containerLayout;
     QTimer *m_updateTimer;
+
+    // Ping feature
+    QLabel *m_pingLabel;
+    QProcess *m_pingProcess;
+    QTimer *m_pingTimer;
+    QString m_pingTarget;
+    bool m_showPing = true;
+    void startPing();
+    void handlePingOutput();
+    void updatePingDisplay(int latency, bool isOnline);
 
     bool m_showInBits = false;
     QStringList m_selectedInterfaces; // List of names to show.

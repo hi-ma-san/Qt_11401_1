@@ -1,6 +1,7 @@
 #include "NetworkWidget.h"
 #include <QDateTime>
 #include <QDebug>
+#include <QRegularExpression>
 
 NetworkWidget::NetworkWidget(QWidget *parent) : BaseComponent(parent) {
     // 設定預設大小與標題
@@ -24,6 +25,26 @@ NetworkWidget::NetworkWidget(QWidget *parent) : BaseComponent(parent) {
     m_updateTimer = new QTimer(this);
     connect(m_updateTimer, &QTimer::timeout, this, &NetworkWidget::updateData);
     m_updateTimer->start(1000); // 預設每秒更新一次
+
+    // Ping Initialization
+    m_pingTarget = "8.8.8.8";
+    m_pingLabel = new QLabel("Ping: -- ms", this);
+    m_pingLabel->setObjectName("pingLabel");
+    mainLayout->addWidget(m_pingLabel, 0, Qt::AlignRight);
+
+    m_pingProcess = new QProcess(this);
+    // Hide console window on Windows
+#ifdef Q_OS_WIN
+    m_pingProcess->setCreateProcessArgumentsModifier([](QProcess::CreateProcessArguments *args) {
+        args->flags |= 0x08000000; // CREATE_NO_WINDOW
+    });
+#endif
+    connect(m_pingProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &NetworkWidget::handlePingOutput);
+
+    m_pingTimer = new QTimer(this);
+    connect(m_pingTimer, &QTimer::timeout, this, &NetworkWidget::startPing);
+    m_pingTimer->start(3000); // Ping every 3 seconds
+    startPing(); // Initial ping
 
     initStyle();
 
@@ -54,6 +75,7 @@ void NetworkWidget::initStyle() {
                         "#nameLabel { font-size: 12px; font-weight: bold; color: rgba(255, 255, 255, 200); }"
                         "#upLabel { font-size: 11px; color: #4CAF50; margin-left: 5px; }"
                         "#downLabel { font-size: 11px; color: #2196F3; margin-left: 5px; }"
+                        "#pingLabel { font-size: 11px; color: rgba(255, 255, 255, 150); margin-top: 5px; }"
                         );
     
     m_titleLabel->setObjectName("titleLabel");
@@ -101,6 +123,10 @@ void NetworkWidget::removeInterfaceRow(const QString &name) {
     NetworkInterfaceUI ui = m_uiRows.take(name);
     m_containerLayout->removeWidget(ui.rowWidget);
     delete ui.rowWidget;
+    
+    // Force shrink to fit content
+    m_container->adjustSize();
+    this->resize(this->minimumSizeHint());
     this->adjustSize();
 }
 
@@ -140,6 +166,28 @@ void NetworkWidget::setCustomSetting(const QString &key, const QVariant &value) 
         // Clear existing rows to force rebuild on next update
         // Or we can handle it in updateData
         updateData();
+    } else if (key == "pingTarget") {
+        m_pingTarget = value.toString();
+        if (m_pingTarget.isEmpty()) m_pingTarget = "8.8.8.8";
+        
+        // Force restart ping with new target
+        if (m_pingProcess->state() != QProcess::NotRunning) {
+            m_pingProcess->kill();
+            m_pingProcess->waitForFinished(100);
+        }
+        startPing();
+    } else if (key == "showPing") {
+        m_showPing = value.toBool();
+        if (m_showPing) {
+            m_pingLabel->show();
+            startPing();
+        } else {
+            m_pingLabel->hide();
+            // Optionally stop the timer or process if you want to save resources completely
+            // But keeping timer running is fine, just don't execute ping in startPing
+        }
+        this->resize(this->minimumSizeHint());
+        this->adjustSize();
     }
 }
 
@@ -278,3 +326,66 @@ void NetworkWidget::updateData() {
     }
 #endif
 }
+
+void NetworkWidget::startPing() {
+    if (!m_showPing) return;
+
+    if (m_pingProcess->state() != QProcess::NotRunning) {
+        return;
+    }
+
+#ifdef Q_OS_WIN
+    // Windows ping: -n 1 (count 1), -w 1000 (timeout 1000ms)
+    QString program = "ping";
+    QStringList arguments;
+    arguments << "-n" << "1" << "-w" << "1000" << m_pingTarget;
+    m_pingProcess->start(program, arguments);
+#else
+    // Linux/Mac ping: -c 1 (count 1), -W 1 (timeout 1s)
+    QString program = "ping";
+    QStringList arguments;
+    arguments << "-c" << "1" << "-W" << "1" << m_pingTarget;
+    m_pingProcess->start(program, arguments);
+#endif
+}
+
+void NetworkWidget::handlePingOutput() {
+    QByteArray output = m_pingProcess->readAllStandardOutput();
+    QString outputStr = QString::fromLocal8Bit(output);
+
+    int latency = -1;
+    bool isOnline = false;
+
+    // Regex to match time=xxms (English), 時間=xxms (Traditional Chinese), 时间=xxms (Simplified Chinese)
+    // Also handles <1ms
+    QRegularExpression re("(?:time|時間|时间)[=<]([\\d\\.]+) ?ms", QRegularExpression::CaseInsensitiveOption);
+    QRegularExpressionMatch match = re.match(outputStr);
+    
+    if (match.hasMatch()) {
+        QString timeStr = match.captured(1);
+        latency = static_cast<int>(timeStr.toDouble());
+        isOnline = true;
+    } else if (outputStr.contains("TTL=", Qt::CaseInsensitive)) {
+        isOnline = true;
+        if (latency == -1) latency = 0;
+    }
+
+    updatePingDisplay(latency, isOnline);
+}
+
+void NetworkWidget::updatePingDisplay(int latency, bool isOnline) {
+    if (isOnline) {
+        m_pingLabel->setText(QString("Ping: %1 ms").arg(latency));
+        if (latency < 50) {
+            m_pingLabel->setStyleSheet("#pingLabel { color: #4CAF50; }"); // Green
+        } else if (latency < 150) {
+            m_pingLabel->setStyleSheet("#pingLabel { color: #FFC107; }"); // Yellow
+        } else {
+            m_pingLabel->setStyleSheet("#pingLabel { color: #F44336; }"); // Red
+        }
+    } else {
+        m_pingLabel->setText("Ping: Timeout");
+        m_pingLabel->setStyleSheet("#pingLabel { color: #F44336; }"); // Red
+    }
+}
+
