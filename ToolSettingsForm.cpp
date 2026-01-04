@@ -141,7 +141,19 @@ void ToolSettingsForm::createAdvancedSettings(const QString &toolId) {
 
         QCheckBox *chkBits = new QCheckBox("顯示為 Bits (bps)", advGroup);
         chkBits->setObjectName("network_bits_checkBox");
+
+        QCheckBox *chkPing = new QCheckBox("顯示 Ping 延遲", advGroup);
+        chkPing->setObjectName("network_ping_checkBox");
         
+        // Ping Target
+        QLabel *lblPing = new QLabel("Ping 延遲檢測目標 (IP/網域):", advGroup);
+        lblPing->setToolTip("輸入 IP (如 8.8.8.8) 或網域 (如 google.com) 來檢測連線延遲。\n數值越低代表連線品質越好。");
+        
+        QLineEdit *editPing = new QLineEdit(advGroup);
+        editPing->setObjectName("pingTarget_lineEdit");
+        editPing->setPlaceholderText("預設: 8.8.8.8 (Google DNS)");
+        editPing->setToolTip("輸入 IP (如 8.8.8.8) 或網域 (如 google.com)");
+
         QLabel *lblInterface = new QLabel("選擇網路介面 (可多選):", advGroup);
         QListWidget *listInterfaces = new QListWidget(advGroup);
         listInterfaces->setObjectName("network_interface_list");
@@ -149,11 +161,22 @@ void ToolSettingsForm::createAdvancedSettings(const QString &toolId) {
         listInterfaces->setFixedHeight(150);
 
         layout->addWidget(chkBits);
+        layout->addWidget(chkPing);
+        layout->addWidget(lblPing);
+        layout->addWidget(editPing);
         layout->addWidget(lblInterface);
         layout->addWidget(listInterfaces);
 
         connect(chkBits, &QCheckBox::clicked, this, [this, chkBits](){
             emit settingChanged("showInBits", chkBits->isChecked());
+        });
+
+        connect(chkPing, &QCheckBox::clicked, this, [this, chkPing](){
+            emit settingChanged("showPing", chkPing->isChecked());
+        });
+
+        connect(editPing, &QLineEdit::editingFinished, this, [this, editPing](){
+            emit settingChanged("pingTarget", editPing->text());
         });
         
         // Handle item changes in the list widget
@@ -243,6 +266,20 @@ void ToolSettingsForm::updateAllUI(BaseComponent* w) {
             chkBits->blockSignals(true);
             chkBits->setChecked(netWidget->isShowInBits());
             chkBits->blockSignals(false);
+        }
+
+        QCheckBox* chkPing = findChild<QCheckBox*>("network_ping_checkBox");
+        if (chkPing) {
+            chkPing->blockSignals(true);
+            chkPing->setChecked(netWidget->isShowPing());
+            chkPing->blockSignals(false);
+        }
+
+        QLineEdit* editPing = findChild<QLineEdit*>("pingTarget_lineEdit");
+        if (editPing) {
+            editPing->blockSignals(true);
+            editPing->setText(netWidget->getPingTarget());
+            editPing->blockSignals(false);
         }
 
         QListWidget* listInterfaces = findChild<QListWidget*>("network_interface_list");
