@@ -18,9 +18,9 @@ MediaWidget::MediaWidget(QWidget *parent)
     // 初始化 UI 組件
     m_titleLabel = new QLabel("MUSIC", this);
     m_currentSongLabel = new QLabel("No song loaded", this);
-    m_previousBtn = new QPushButton("《", this);
-    m_playPauseBtn = new QPushButton("►", this);
-    m_nextBtn = new QPushButton("》", this);
+    m_previousBtn = new QPushButton("⏮︎", this);
+    m_playPauseBtn = new QPushButton("▶︎", this);
+    m_nextBtn = new QPushButton("⏭︎", this);
 
     // 設定按鈕大小
     m_previousBtn->setFixedSize(40, 40);
@@ -183,9 +183,9 @@ void MediaWidget::updateSongLabel()
 void MediaWidget::updatePlayPauseButton()
 {
     if (m_isPlaying) {
-        m_playPauseBtn->setText("||");
+        m_playPauseBtn->setText("⏸︎");
     } else {
-        m_playPauseBtn->setText("►");
+        m_playPauseBtn->setText("▶︎");
     }
 }
 
