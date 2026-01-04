@@ -55,7 +55,7 @@ private slots:
     void on_applySetting_clicked();
 
     /**
-     * @brief 切換主視窗的顯示或隱藏狀態 (用於托盤連動) 喵
+     * @brief 切換主視窗的顯示或隱藏狀態 (用於托盤連動) 
      */
     void toggleVisibility();
 
@@ -89,7 +89,7 @@ private:
     bool loadToolsConfiguration();
 
     /**
-     * @brief 初始化系統托盤功能與選單喵
+     * @brief 初始化系統托盤功能與選單
      */
     void initTrayIcon();
 
@@ -121,7 +121,7 @@ private:
 protected:
     /**
      * @brief 處理視窗關閉事件
-     * 若托盤圖示正在顯示，則縮排至托盤；否則直接結束程式喵
+     * 若托盤圖示正在顯示，則縮排至托盤；否則直接結束程式
      * @param event 關閉事件指標
      */
     void closeEvent(QCloseEvent *event) override;

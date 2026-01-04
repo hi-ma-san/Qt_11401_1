@@ -69,7 +69,7 @@ void ImageWidget::loadMedia(const QString &path) {
     QString ext = info.suffix().toLower();
     QSize rawSize;
 
-    // 根據格式載入媒體喵
+    // 根據格式載入媒體
     if (ext == "gif") {
         m_gifMovie = new QMovie(path);
         // 先暫時啟動以獲取第一幀的大小
@@ -88,14 +88,14 @@ void ImageWidget::loadMedia(const QString &path) {
     // 3. 計算 400x400 上限內的基準尺寸 (不含 Margins)
     if (!rawSize.isEmpty()) {
         m_baseSize = rawSize.scaled(400, 400, Qt::KeepAspectRatio);
-        updateComponentSize(); // 立即應用目前的縮放比例喵
+        updateComponentSize(); // 立即應用目前的縮放比例
     }
 }
 
 void ImageWidget::updateComponentSize() {
     if (!m_baseSize.isValid()) return;
 
-    // 根據百分比計算內容尺寸喵
+    // 根據百分比計算內容尺寸
     QSize contentSize = m_baseSize * (m_scale / 100.0);
 
     // 標籤設定為內容大小

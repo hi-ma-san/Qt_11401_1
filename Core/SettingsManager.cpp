@@ -81,6 +81,6 @@ void SettingsManager::setLastTheme(const QString &themeName) {
     if (m_lastTheme != themeName) {
         m_lastTheme = themeName;
         m_settings->setValue("Global/LastTheme", themeName);
-        m_settings->sync(); // 確保立即寫入磁碟喵
+        m_settings->sync(); // 確保立即寫入磁碟
     }
 }
