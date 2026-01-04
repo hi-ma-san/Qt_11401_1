@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui multimedia
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -19,6 +19,7 @@ SOURCES += \
     Widgets/DiskWidget.cpp \
     Widgets/NetworkWidget.cpp \
     Widgets/ToDoWidget.cpp \
+    Widgets/MediaWidget.cpp \
     main.cpp
 
 HEADERS += \
@@ -32,7 +33,8 @@ HEADERS += \
     Widgets/CpuWidget.h \
     Widgets/DiskWidget.h \
     Widgets/NetworkWidget.h \
-    Widgets/ToDoWidget.h
+    Widgets/ToDoWidget.h \
+    Widgets/MediaWidget.h
 
 FORMS += \
     ControlPanel.ui \

@@ -9,6 +9,7 @@
 #include "Widgets/NetworkWidget.h"
 #include "Widgets/ToDoWidget.h"
 #include "Widgets/ImageWidget.h"
+#include "Widgets/MediaWidget.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -154,6 +155,7 @@ void ControlPanel::initWidgets() {
         else if (widgetClass == "NetworkWidget") instance = new NetworkWidget();
         else if (widgetClass == "ToDoWidget") instance = new ToDoWidget();
         else if (widgetClass == "ImageWidget") instance = new ImageWidget();
+        else if (widgetClass == "MediaWidget") instance = new MediaWidget();
 
         if (instance) {
             m_widgetInstances.insert(id, instance);
@@ -318,6 +320,10 @@ QJsonObject ControlPanel::getGlobalLayoutData() {
             widgetInfo["scale"] = imgW->currentScale();
             widgetInfo["path"] = imgW->currentPath();
         }
+        // 5. MediaWidget
+        else if (auto* mediaW = dynamic_cast<MediaWidget*>(w)) {
+            widgetInfo["path"] = mediaW->currentPath();
+        }
 
         widgetsArray.append(widgetInfo);
     }
@@ -367,6 +373,9 @@ void ControlPanel::on_LoadTheme_clicked() {
         else if (auto* imgW = dynamic_cast<ImageWidget*>(w)) {
             imgW->setCustomSetting("scale", obj["scale"].toVariant());
             imgW->setCustomSetting("path", obj["path"].toVariant());
+        }
+        else if (auto* mediaW = dynamic_cast<MediaWidget*>(w)) {
+            mediaW->setCustomSetting("path", obj["path"].toVariant());
         }
 
         if (obj["visible"].toBool())
