@@ -367,7 +367,7 @@ void ControlPanel::on_LoadTheme_clicked() {
         }
         else if (auto* netW = dynamic_cast<NetworkWidget*>(w)) {
             netW->setCustomSetting("showInBits", obj["showInBits"].toVariant());
-            // 這裡假設 setCustomSetting 裡面有實作還原介面清單喵
+            // 這裡假設 setCustomSetting 裡面有實作還原介面清單
             netW->setCustomSetting("selectedInterfaces", obj["selectedInterfaces"].toVariant());
         }
         else if (auto* imgW = dynamic_cast<ImageWidget*>(w)) {
@@ -388,7 +388,7 @@ void ControlPanel::on_LoadTheme_clicked() {
             w->hide();
         }
     }
-    // 更新左側列表對應的 UI 面板喵
+    // 更新左側列表對應的 UI 面板
     on_toolList_currentRowChanged(ui->toolList_widget->currentRow());
     SettingsManager::instance()->setLastTheme(themeName);
 }

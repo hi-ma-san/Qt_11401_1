@@ -59,21 +59,21 @@ public:
     bool isClickThrough() const;
 
     /**
-     * @brief 設定是否開啟滑鼠點擊穿透喵
+     * @brief 設定是否開啟滑鼠點擊穿透
      * @param enabled 為 true 時視窗將不再接收滑鼠事件
      */
     void setClickThrough(bool enabled) {
         Qt::WindowFlags flags = windowFlags();
         if (enabled) {
-            // 加上穿透旗標喵
+            // 加上穿透旗標
             flags |= Qt::WindowTransparentForInput;
         } else {
-            // 移除穿透旗標喵
+            // 移除穿透旗標
             flags &= ~Qt::WindowTransparentForInput;
         }
         setWindowFlags(flags);
 
-        // 必須重新 show 才能確保 Windows 系統正確套用旗標變動喵
+        // 必須重新 show 才能確保 Windows 系統正確套用旗標變動
         if (isVisible()) {
             show();
         }
